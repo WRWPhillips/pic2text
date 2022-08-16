@@ -17,6 +17,6 @@ public class AsciiController {
     public String getAsciis(Model model) {
         model.addAttribute("asciis", asciiRepository.findAll());
 
-        return "asciis";
+        return "asciis/list";
     }
 }

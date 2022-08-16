@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleaf.org">
+<head>
+    <link href='https://fonts.googleapis.com/css?family=JetBrains Mono' rel='stylesheet'>
+    <style>
+        body {
+            font-family: 'JetBrains Mono';font-size: 2vw;
+        }
+    </style>
+    <meta charset="UTF-8" >
+    <title>Title</title>
+</head>
+<body>
+  <h1>Asciis Listed</h1>
+  <div th:each="ascii : ${asciis}">
+    <h2 th:text="${ascii.title}"></h2>
+    <h3 th:text="${ascii.description}"></h3>
+    <p th:text="${ascii.asciiText}"></p>
+  </div>
+</body>
+</html>
