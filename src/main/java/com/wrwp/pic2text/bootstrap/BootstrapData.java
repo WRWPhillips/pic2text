@@ -4,6 +4,9 @@ import com.wrwp.pic2text.repositories.AsciiRepository;
 import com.wrwp.pic2text.domain.Ascii;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
+
+import java.nio.file.Path;
+
 @Component
 public class BootstrapData implements CommandLineRunner {
     private final AsciiRepository asciiRepository;
@@ -73,8 +76,5 @@ ccxcx######xxxx#x#xx##xx###x###xccx#############################################
 xxxxxxxcccc]]]]]cccxxxxcxccccc]]::::******]]]cxx#######################x########
 ###########xxxxxx####xxx###x###xxxxcxccccxcc]ccxxxx#xxxxxxxxxxxxxxxxxcxccccxxx#x""");
         asciiRepository.save(darkHorse);
-
-        System.out.println(horse.getAsciiText());
-        System.out.println(darkHorse.getAsciiText());
     }
 }
