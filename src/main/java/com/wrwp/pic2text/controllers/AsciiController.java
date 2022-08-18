@@ -43,7 +43,9 @@ public class AsciiController {
             @RequestParam("height") int height,
             @RequestParam("width") int width,
             @RequestParam("palette") String palette,
-            @RequestParam(value = "reverse", required = false) boolean reverse
+            @RequestParam(value = "reverse", required = false) boolean reverse,
+            @RequestParam("title") String title,
+            @RequestParam("description") String description
             ) throws IOException {
 
         TempDirectorySingleton tempDirectory = TempDirectorySingleton.getInstance();
@@ -54,11 +56,12 @@ public class AsciiController {
             os.write(uploadedFile.getBytes());
         }
 
-        boolean reverseSelected = reverse ? false : true;
+        boolean reverseSelected = reverse ? true : false;
 
         AsciiBuilder builder = new AsciiBuilder(width, height, palette, reverseSelected, file);
+        Ascii ascii = new Ascii(title, description, builder.toString());
 
-        System.out.println(builder);
+        asciiRepository.save(ascii);
 
         return "redirect:";
     }

@@ -39,15 +39,13 @@ public class AsciiBuilder {
         int chunkWidth = chunkSizes.get("chunkSizeX");
         int chunkHeight = chunkSizes.get("chunkSizeY");
 
-        Raster imagePixels = image.getData();
-
         char[] paletteArray = palette.toCharArray();
 
         int resIdx = 0;
         for(int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                float intensity = chunkIntensity(imagePixels, x, y, chunkWidth, chunkHeight);
-                float charIdx = intensity * Integer.valueOf(palette.length()).floatValue();
+                float intensity = chunkIntensity(x * chunkWidth, y * chunkHeight, chunkWidth, chunkHeight);
+                float charIdx = intensity / 255.0f * Integer.valueOf(palette.length()).floatValue();
                 System.out.println(Math.round(charIdx));
                 result[resIdx] = paletteArray[Math.round(charIdx) - 1];
                 resIdx++;
@@ -55,25 +53,21 @@ public class AsciiBuilder {
             result[resIdx] = '\n';
             resIdx++;
         }
-        return Arrays.toString(result);
+        return String.valueOf(result);
     }
 
-    public float chunkIntensity(Raster imagePixels, int x, int y, int chunkWidth, int chunkHeight) {
-        ColorSpace colorSpace = image.getColorModel().getColorSpace();
+    public float chunkIntensity(int x, int y, int chunkWidth, int chunkHeight) {
         float total = 0.0f;
         for(int yOffset = 0; yOffset < chunkHeight; yOffset++) {
             for(int xOffset = 0; xOffset < chunkWidth; xOffset++) {
                 float[] pixelArr = new float[4];
-                float[] convertedPixelArr;
-                pixelArr = imagePixels.getPixel(x + xOffset,y + yOffset,pixelArr);
-                convertedPixelArr = colorSpace.toRGB(pixelArr);
-                System.out.println(String.format("r %f, g %f, b %f", convertedPixelArr[0], convertedPixelArr[1], convertedPixelArr[2]));
-                total += (convertedPixelArr[0] + convertedPixelArr[1] + convertedPixelArr[2]);
+                int pixel = image.getRGB(x + xOffset,y + yOffset);
+                Color color = new Color(pixel, true);
+                System.out.println(String.format("r %o, g %o, b %o", color.getRed(), color.getGreen(), color.getBlue()));
+                total += (color.getRed() + color.getGreen() + color.getBlue());
             }
         }
         System.out.println(total);
-        System.out.println(colorSpace.getType());
-
         System.out.println(String.format("Chunk width: %o, Chunk height: %o", chunkWidth, chunkHeight));
         System.out.println(total / 3 / (chunkWidth * chunkHeight));
         return total / 3 / (chunkWidth * chunkHeight);
