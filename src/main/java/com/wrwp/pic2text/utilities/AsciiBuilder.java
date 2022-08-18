@@ -2,6 +2,7 @@ package com.wrwp.pic2text.utilities;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.color.ColorSpace;
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
 import java.io.File;
@@ -12,20 +13,14 @@ import java.util.HashMap;
 public class AsciiBuilder {
     private final int width;
     private final int height;
-    private final String palette;
+    private String palette;
     private final boolean reverse;
     private BufferedImage image;
-    private final File file;
-
-    private float colorMax = 65535.0f;
-
-    private String outputText;
 
     public AsciiBuilder(int width, int height, String palette, boolean reverse, File file) {
         this.width = width;
         this.height = height;
         this.palette = palette;
-        this.file = file;
         this.reverse = reverse;
 
         try {
@@ -35,10 +30,10 @@ public class AsciiBuilder {
         }
     }
 
-    public String process(BufferedImage image, int height, int width, String palette, boolean reverse) {
-        byte[] result = new byte[height + height * width];
+    public String process() {
+        char[] result = new char[height + height * width];
         if(reverse) {
-            palette = reversePalette();
+            this.palette = reversePalette();
         }
         HashMap<String, Integer> chunkSizes = chunkSizes(image, height, width);
         int chunkWidth = chunkSizes.get("chunkSizeX");
@@ -46,13 +41,42 @@ public class AsciiBuilder {
 
         Raster imagePixels = image.getData();
 
+        char[] paletteArray = palette.toCharArray();
+
         int resIdx = 0;
         for(int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                System.out.println(imagePixels.getSample(x, y, 0));
+                float intensity = chunkIntensity(imagePixels, x, y, chunkWidth, chunkHeight);
+                float charIdx = intensity * Integer.valueOf(palette.length()).floatValue();
+                System.out.println(Math.round(charIdx));
+                result[resIdx] = paletteArray[Math.round(charIdx) - 1];
+                resIdx++;
             }
+            result[resIdx] = '\n';
+            resIdx++;
         }
         return Arrays.toString(result);
+    }
+
+    public float chunkIntensity(Raster imagePixels, int x, int y, int chunkWidth, int chunkHeight) {
+        ColorSpace colorSpace = image.getColorModel().getColorSpace();
+        float total = 0.0f;
+        for(int yOffset = 0; yOffset < chunkHeight; yOffset++) {
+            for(int xOffset = 0; xOffset < chunkWidth; xOffset++) {
+                float[] pixelArr = new float[4];
+                float[] convertedPixelArr;
+                pixelArr = imagePixels.getPixel(x + xOffset,y + yOffset,pixelArr);
+                convertedPixelArr = colorSpace.toRGB(pixelArr);
+                System.out.println(String.format("r %f, g %f, b %f", convertedPixelArr[0], convertedPixelArr[1], convertedPixelArr[2]));
+                total += (convertedPixelArr[0] + convertedPixelArr[1] + convertedPixelArr[2]);
+            }
+        }
+        System.out.println(total);
+        System.out.println(colorSpace.getType());
+
+        System.out.println(String.format("Chunk width: %o, Chunk height: %o", chunkWidth, chunkHeight));
+        System.out.println(total / 3 / (chunkWidth * chunkHeight));
+        return total / 3 / (chunkWidth * chunkHeight);
     }
 
     public String reversePalette() {
@@ -83,13 +107,6 @@ public class AsciiBuilder {
 
     @Override
     public String toString() {
-        return "AsciiBuilder{" +
-                "width=" + width +
-                ", height=" + height +
-                ", palette='" + palette + '\'' +
-                ", image=" + image +
-                ", file=" + file +
-                ", outputText='" + outputText + '\'' +
-                '}';
+        return process();
     }
 }
