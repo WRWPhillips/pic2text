@@ -30,7 +30,7 @@ public class AsciiBuilder {
         }
     }
 
-    public String process() {
+    private String process() {
         char[] result = new char[height + height * width];
         if(reverse) {
             this.palette = reversePalette();
@@ -46,7 +46,6 @@ public class AsciiBuilder {
             for (int x = 0; x < width; x++) {
                 float intensity = chunkIntensity(x * chunkWidth, y * chunkHeight, chunkWidth, chunkHeight);
                 float charIdx = intensity / 255.0f * Integer.valueOf(palette.length()).floatValue();
-                System.out.println(Math.round(charIdx));
                 result[resIdx] = paletteArray[Math.round(charIdx)];
                 resIdx++;
             }
@@ -56,24 +55,19 @@ public class AsciiBuilder {
         return String.valueOf(result);
     }
 
-    public float chunkIntensity(int x, int y, int chunkWidth, int chunkHeight) {
+    private float chunkIntensity(int x, int y, int chunkWidth, int chunkHeight) {
         float total = 0.0f;
         for(int yOffset = 0; yOffset < chunkHeight; yOffset++) {
             for(int xOffset = 0; xOffset < chunkWidth; xOffset++) {
-                float[] pixelArr = new float[4];
                 int pixel = image.getRGB(x + xOffset,y + yOffset);
                 Color color = new Color(pixel, true);
-                System.out.println(String.format("r %o, g %o, b %o", color.getRed(), color.getGreen(), color.getBlue()));
                 total += (color.getRed() + color.getGreen() + color.getBlue());
             }
         }
-        System.out.println(total);
-        System.out.println(String.format("Chunk width: %o, Chunk height: %o", chunkWidth, chunkHeight));
-        System.out.println(total / 3 / (chunkWidth * chunkHeight));
         return total / 3 / (chunkWidth * chunkHeight);
     }
 
-    public String reversePalette() {
+    private String reversePalette() {
         String str = palette;
         StringBuilder nstr= new StringBuilder();
         char ch;
