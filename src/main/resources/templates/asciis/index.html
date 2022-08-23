@@ -26,6 +26,7 @@
 </head>
 <body>
   <h1>Asciis Listed</h1>
+  <a href="/asciis/new">Create a new Ascii</a>
   <div class="content">
     <div th:each="ascii : ${asciis}" class="asciis">
         <h2 th:text="${ascii.title}"></h2>
@@ -33,6 +34,8 @@
         <pre>
           <p th:text="${ascii.asciiText}"></p>
         </pre>
+        <a th:href="@{/asciis/edit/{id}(id=${ascii.id})}">Edit Ascii</a>
+        <a th:href="@{/asciis/delete/{id}(id=${ascii.id})}">Delete Ascii</a>
     </div>
   </div>
 </body>

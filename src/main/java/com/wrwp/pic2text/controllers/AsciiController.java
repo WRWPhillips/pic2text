@@ -7,9 +7,8 @@ import com.wrwp.pic2text.utilities.TempDirectorySingleton;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
@@ -17,8 +16,10 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Optional;
 
 @Controller
+@RequestMapping("/asciis")
 public class AsciiController {
     private final AsciiRepository asciiRepository;
 
@@ -26,18 +27,55 @@ public class AsciiController {
         this.asciiRepository = asciiRepository;
     }
 
-    @RequestMapping("/asciis")
+    @RequestMapping("/")
     public String getAsciis(Model model) {
         model.addAttribute("asciis", asciiRepository.findAll());
 
         return "asciis/index";
     }
-    @RequestMapping(value= "/asciis/new")
+    @RequestMapping(value= "/new")
     public String showNewAsciiForm(Ascii ascii) {
         return "asciis/new_ascii";
     }
 
-    @PostMapping (value = "/asciis/save", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE}, produces = MediaType.TEXT_PLAIN_VALUE)
+    @GetMapping ("/delete/{id}")
+    public String deleteStudent(@PathVariable("id") long id, Model model) {
+        Ascii ascii = asciiRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid ascii Id:" + id));
+        asciiRepository.delete(ascii);
+        model.addAttribute("asciis", asciiRepository.findAll());
+        return "asciis/index";
+    }
+
+    @GetMapping("/edit/{id}")
+    public String showUpdateForm(@PathVariable("id") long id, Model model) {
+        Ascii ascii = asciiRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid student Id:" + id));
+        model.addAttribute("ascii", ascii);
+        return "asciis/update_ascii";
+    }
+
+    @PostMapping("/update/{id}")
+    public String updateAscii(@PathVariable("id") long id, Ascii ascii, BindingResult result,
+                                Model model) {
+
+        Optional<Ascii> potentialOldAscii = asciiRepository.findById(id);
+
+        Ascii oldAscii = null;
+        if (potentialOldAscii.isPresent()) {
+            oldAscii = potentialOldAscii.get();
+        }
+
+        assert oldAscii != null;
+        oldAscii.setTitle(ascii.getTitle());
+        oldAscii.setDescription(ascii.getDescription());
+
+        asciiRepository.save(oldAscii);
+        model.addAttribute("asciis", asciiRepository.findAll());
+        return "asciis/index";
+    }
+
+    @PostMapping (value = "/save", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE}, produces = MediaType.TEXT_PLAIN_VALUE)
     public String testUpload1(
             @RequestParam("file") MultipartFile uploadedFile,
             @RequestParam("height") int height,
