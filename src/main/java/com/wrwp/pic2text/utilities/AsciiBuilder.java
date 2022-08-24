@@ -46,7 +46,7 @@ public class AsciiBuilder {
             for (int x = 0; x < width; x++) {
                 float intensity = chunkIntensity(x * chunkWidth, y * chunkHeight, chunkWidth, chunkHeight);
                 float charIdx = intensity / 255.0f * Integer.valueOf(palette.length()).floatValue();
-                result[resIdx] = paletteArray[Math.round(charIdx)];
+                result[resIdx] = paletteArray[Math.round(charIdx) - 1];
                 resIdx++;
             }
             result[resIdx] = '\n';
